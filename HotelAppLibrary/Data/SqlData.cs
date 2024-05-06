@@ -8,7 +8,7 @@ using System.Text;
 
 namespace HotelAppLibrary.Data
 {
-    public class SqlData
+    public class SqlData : IDatabaseData
     {
         private readonly ISqlDataAccess _db;
         private const string connectionStringName = "SqlDB";
@@ -20,7 +20,7 @@ namespace HotelAppLibrary.Data
 
         public List<RoomTypeModel> GetAvailablesRoomTypes(DateTime startDate, DateTime endDate)
         {
-            return _db.LoadData<RoomTypeModel, dynamic>("dbo.spRoomTypes_GetAvailableTypes", new {startDate, endDate}, connectionStringName, true);
+            return _db.LoadData<RoomTypeModel, dynamic>("dbo.spRoomTypes_GetAvailableTypes", new { startDate, endDate }, connectionStringName, true);
         }
 
 
@@ -34,7 +34,7 @@ namespace HotelAppLibrary.Data
 
             TimeSpan timeStaying = endDate.Date.Subtract(startDate.Date);
 
-            List<RoomModel> availableRooms = _db.LoadData<RoomModel, dynamic>("dbo.spRoom_GetAvailableRooms", new {startDate, endDate, roomTypeId }, connectionStringName, true);
+            List<RoomModel> availableRooms = _db.LoadData<RoomModel, dynamic>("dbo.spRoom_GetAvailableRooms", new { startDate, endDate, roomTypeId }, connectionStringName, true);
 
             _db.SaveData("dbo.spBookings_Insert", new { roomId = availableRooms.First().Id, guestId = guest.Id, startDate = startDate, endDate = endDate, totalPrice = timeStaying.Days * roomtype.Price }, connectionStringName, true);
 
@@ -45,5 +45,10 @@ namespace HotelAppLibrary.Data
             return _db.LoadData<FullBookingModel, dynamic>("dbo.spBookings_Search", new { lastName, todaysDate = DateTime.Now.Date }, connectionStringName, true);
         }
 
+
+        public void CheckInGuest(int bookingId)
+        {
+            _db.SaveData("dbo.spBookings_CheckIn", new { bookingId }, connectionStringName, true);
+        }
     }
 }
