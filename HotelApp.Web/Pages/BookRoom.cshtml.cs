@@ -15,8 +15,8 @@ namespace HotelApp.Web.Pages
         public int RoomTypeId { get; set; }
 
         [BindProperty(SupportsGet = true)]
-        public DateTime  StartDate { get; set; }
-        
+        public DateTime StartDate { get; set; }
+
         [BindProperty(SupportsGet = true)]
         public DateTime EndDate { get; set; }
 
