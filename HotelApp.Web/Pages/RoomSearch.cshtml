@@ -61,7 +61,9 @@
                     </td>
 
                     <td>@string.Format("{0:c}", room.Price)</td>
-                    <td><a href="">Book Now</a></td>
+                    <td><a asp-page="/BookRoom" asp-route-startdate="@Model.StartDate.ToShortDateString()" 
+                        asp-route-enddate="@Model.EndDate.ToShortDateString()"
+                        asp-route-roomtypeid="@room.Id">Book Now</a></td>
                 </tr>
             }
         </tbody>
