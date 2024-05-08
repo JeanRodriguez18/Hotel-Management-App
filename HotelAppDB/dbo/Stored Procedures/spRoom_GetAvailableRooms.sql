@@ -3,7 +3,7 @@
 	@endDate date,
 	@roomTypeId int
 AS
-begin
+BEGIN
 	set nocount on;
 
 	select r.*
@@ -17,5 +17,5 @@ begin
 		or (b.StartDate <= @endDate and @endDate < b.EndDate)
 		or (b.StartDate <= @startDate and @startDate < b.EndDate)
 	);
-end
+END
 

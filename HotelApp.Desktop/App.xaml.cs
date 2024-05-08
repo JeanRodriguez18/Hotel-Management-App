@@ -32,6 +32,7 @@ namespace HotelApp.Desktop
 
 
             services.AddTransient<ISqlDataAccess, SqlDataAccess>();
+            services.AddTransient<ISqliteDataAccess, SqliteDataAccess>();
 
             services.AddTransient<IDatabaseData, SqlData>();
 

@@ -2,7 +2,7 @@
 	@startDate date,
 	@endDate date
 AS
-begin
+BEGIN
 	
 	set nocount on;
 
@@ -18,4 +18,4 @@ begin
 	)
 	group by rt.Id, rt.Title, rt.Description, rt.Price
 
-end
+END
