@@ -31,18 +31,30 @@ namespace HotelApp.Desktop
             services.AddTransient<CheckInForm>();
 
 
-            services.AddTransient<ISqlDataAccess, SqlDataAccess>();
             services.AddTransient<ISqliteDataAccess, SqliteDataAccess>();
+            services.AddTransient<ISqlDataAccess, SqlDataAccess>();
 
-            services.AddTransient<IDatabaseData, SqlData>();
-
-            
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json");
 
 
             IConfiguration config = builder.Build();
+            string dbChoice = config.GetValue<string>("DatabaseChoice").ToLower();
+
+            if (dbChoice == "sql")
+            {
+                services.AddTransient<IDatabaseData, SqlData>();
+            }
+            else if (dbChoice == "sqlite")
+            {
+                services.AddTransient<IDatabaseData, SqliteData>();
+            }
+            else
+            {
+                //fallback //default value
+                services.AddTransient<IDatabaseData, SqlData>();
+            }
 
             services.AddSingleton(config);
 
