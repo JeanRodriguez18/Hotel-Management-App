@@ -18,7 +18,50 @@ namespace HotelAppLibrary.Data
 
         public void BookGuests(string firstName, string lastName, DateTime startDate, DateTime endDate, int roomTypeId)
         {
-            throw new NotImplementedException();
+            string sql = @"select 1 from Guests where FirstName = @firstName and LastName = @lastName";
+
+            int result = _db.LoadData<dynamic, dynamic>(sql, new { firstName, lastName }, connectionStringName).Count();
+
+            if (result == 0)
+            {
+                sql = @"insert into Guests(FirstName, LastName)
+		                values (@firstName, @lastName);";
+
+                _db.SaveData(sql, new { firstName, lastName }, connectionStringName);
+            }
+
+            sql = @"select top 1 [Id], [FirstName], [LastName] 
+	                from Guests
+	                where FirstName = @firstName and LastName = @lastName LIMIT 1;";
+
+
+            GuestModel guest = _db.LoadData<GuestModel, dynamic>(sql, new {firstName, lastName}, connectionStringName).First();
+
+            sql = @"select * from RoomTypes where Id = @roomTypeId";
+
+            RoomTypeModel roomType = _db.LoadData<RoomTypeModel, dynamic>(sql, new {roomTypeId}, connectionStringName).First();
+
+            TimeSpan timeStaying = endDate.Date.Subtract(startDate);
+
+            sql = @"select r.*
+	                from Rooms r
+	                inner join RoomTypes rt on rt.id = r.RoomTypeId
+	                where r.RoomTypeId = @roomTypeId 
+	                and r.Id not in (
+	                select b.RoomId
+	                from Bookings b 
+	                where (@startDate < b.StartDate and @endDate > b.EndDate)
+		                or (b.StartDate <= @endDate and @endDate < b.EndDate)
+		                or (b.StartDate <= @startDate and @startDate < b.EndDate)
+	                );";
+
+            List<RoomModel> availableRooms = _db.LoadData<RoomModel, dynamic>(sql, new { startDate, endDate, roomTypeId }, connectionStringName);
+
+
+            sql = @"insert into Bookings(RoomId, GuestId, StartDate, EndDate, TotalPrice)
+	                values(@roomId, @guestId, @startDate, @endDate, @totalPrice);";
+
+            _db.SaveData(sql, new { roomId = availableRooms.First().Id, guestId = guest.Id, startDate = startDate, endDate = endDate, totalPrice = roomType.Price * timeStaying.Days }, connectionStringName);
         }
 
         public void CheckInGuest(int bookingId)
@@ -50,7 +93,11 @@ namespace HotelAppLibrary.Data
 
         public RoomTypeModel GetRoomTypeById(int id)
         {
-            throw new NotImplementedException();
+            string sql = @"select [Id], [Title], [Description], [Price]
+	                        from RoomTypes
+	                        where Id = @id;";
+
+            return _db.LoadData<RoomTypeModel, dynamic>(sql, new { id }, connectionStringName).FirstOrDefault();
         }
 
         public List<FullBookingModel> SearchBookings(string lastName)

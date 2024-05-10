@@ -8,7 +8,7 @@ begin
 
 	select [Id], [Title], [Description], [Price]
 	from dbo.RoomTypes
-	where Id = @id
+	where Id = @id;
 
 
 end
