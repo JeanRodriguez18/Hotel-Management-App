@@ -30,7 +30,7 @@ namespace HotelAppLibrary.Data
                 _db.SaveData(sql, new { firstName, lastName }, connectionStringName);
             }
 
-            sql = @"select top 1 [Id], [FirstName], [LastName] 
+            sql = @"select [Id], [FirstName], [LastName] 
 	                from Guests
 	                where FirstName = @firstName and LastName = @lastName LIMIT 1;";
 
@@ -66,7 +66,12 @@ namespace HotelAppLibrary.Data
 
         public void CheckInGuest(int bookingId)
         {
-            throw new NotImplementedException();
+
+            string sql = @"Update Bookings
+                            set CheckedIn = 1
+                            where Id = @bookingId;";
+
+            _db.SaveData(sql, new { bookingId }, connectionStringName);
         }
 
         public List<RoomTypeModel> GetAvailablesRoomTypes(DateTime startDate, DateTime endDate)
@@ -102,7 +107,30 @@ namespace HotelAppLibrary.Data
 
         public List<FullBookingModel> SearchBookings(string lastName)
         {
-            throw new NotImplementedException();
+            string sql = @"select [b].[Id], [b].[RoomId], [b].[GuestId], [b].[StartDate], [b].[EndDate], [b].[CheckedIn], [b].[TotalPrice], 
+	                        [g].[FirstName], [g].[LastName], 
+	                        [r].[RoomNumber], [r].[RoomTypeId], 
+	                        [rt].[Title], [rt].[Description], [rt].[Price] 
+	                        from Bookings b
+	                        inner join Guests g on b.GuestId = g.Id
+	                        inner join Rooms r on b.RoomId = r.Id
+	                        inner join RoomTypes rt on r.RoomTypeId = rt.Id 
+	                        where g.LastName = @lastName and b.StartDate = @todaysDate";
+
+            DateTime todaysDate = DateTime.Now.Date;
+           
+            
+            var output = _db.LoadData<FullBookingModel, dynamic>(sql, new {lastName, todaysDate}, connectionStringName).ToList();
+
+            output.ForEach(x=>
+            {
+                x.Price = x.Price / 100;
+                x.TotalPrice = x.TotalPrice / 100;
+            });
+
+            return output;
+
+
         }
     }
 }
